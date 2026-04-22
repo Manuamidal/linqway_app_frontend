@@ -19,6 +19,7 @@ export type HamburgerMenuItemId =
   | "payment"
   | "nursing"
   | "records"
+  | "reports"
   | "logout";
 
 export interface HamburgerMenuProps {
@@ -33,6 +34,7 @@ const MENU_ROWS: { id: HamburgerMenuItemId; label: string }[] = [
   { id: "payment", label: "Payment" },
   { id: "nursing", label: "Nursing" },
   { id: "records", label: "Records" },
+  { id: "reports", label: "Reports" },
   { id: "logout", label: "Logout" },
 ];
 

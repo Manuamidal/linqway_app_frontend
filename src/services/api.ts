@@ -14,7 +14,7 @@ import axios, { AxiosError } from "axios";
 // ─── Axios instance ──────────────────────────────────────────────────────────
 
 const api = axios.create({
-  baseURL: "http://192.168.29.58:8000/api/v1",
+  baseURL: process.env.EXPO_PUBLIC_API_BASE_URL,
   timeout: 10000, // 10 seconds – if backend hangs, request is cancelled
   headers: {
     "Content-Type": "application/json",

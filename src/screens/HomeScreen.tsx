@@ -1,3 +1,10 @@
+/**
+ * HomeScreen.tsx  (updated)
+ *
+ * Only change: added <HealthStoryBot /> — the floating 🤖 FAB
+ * that opens the AI health story bot.
+ */
+
 import React, { useState } from "react";
 import { ImageSourcePropType, ScrollView, View, StyleSheet } from "react-native";
 
@@ -8,11 +15,9 @@ import ConsultBanner from "../components/home/ConsultBanner";
 import ClinicBanner from "../components/home/ClinicBanner";
 import ConsultForGrid from "../components/home/ConsultForGrid";
 import WhatsAppHelpBar from "../components/home/WhatsAppHelpBar";
+import HealthStoryBot from "../components/common/HealthStoryBot"; // ← new
 
 const HomeScreen = () => {
-  // Replace these with your own local images:
-  // const consultImage = require("../assets/consult-doctor.png");
-  // const clinicImage = require("../assets/nearby-clinic.jpg");
   const consultImage: ImageSourcePropType | undefined = undefined;
   const clinicImage: ImageSourcePropType | undefined = undefined;
   const [isScrolled, setIsScrolled] = useState(false);
@@ -41,6 +46,9 @@ const HomeScreen = () => {
           <WhatsAppHelpBar />
         </View>
       </ScrollView>
+
+      {/* ── AI Health Story Bot floating button ── */}
+      <HealthStoryBot />
     </View>
   );
 };

@@ -1,3 +1,13 @@
+/**
+ * Doctorsearchmodal.tsx  (updated)
+ *
+ * Changes from original:
+ *   - Added `initialSpecialization?: string` prop
+ *   - When provided (by HealthStoryBot), auto-sets the active chip filter
+ *     so the modal opens directly showing doctors for that specialization
+ *   - Everything else is unchanged
+ */
+
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -11,12 +21,14 @@ import {
   SafeAreaView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { doctorApi, type Doctor } from "../services/api"; // ← single import
+import { doctorApi, type Doctor } from "../services/api";
 import { colors } from "../styles/colors";
 
 interface Props {
   visible: boolean;
   onClose: () => void;
+  /** When set (e.g. by HealthStoryBot), the modal opens pre-filtered to this specialization */
+  initialSpecialization?: string;
 }
 
 const getSpecializations = (doctors: Doctor[]): string[] =>
@@ -31,23 +43,46 @@ const getScore = (text: string, query: string): number => {
   return 0;
 };
 
-const DoctorSearchModal: React.FC<Props> = ({ visible, onClose }) => {
-  const [query, setQuery] = useState("");
+const DoctorSearchModal: React.FC<Props> = ({ visible, onClose, initialSpecialization }) => {
+  const [query, setQuery]           = useState("");
   const [activeChip, setActiveChip] = useState<string | null>(null);
-  const [doctors, setDoctors] = useState<Doctor[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [doctors, setDoctors]       = useState<Doctor[]>([]);
+  const [loading, setLoading]       = useState(false);
+  const [error, setError]           = useState<string | null>(null);
 
   useEffect(() => {
     if (!visible) return;
+
     setLoading(true);
     setError(null);
+
     doctorApi
       .getAll()
-      .then((data) => setDoctors(data))
+      .then((data) => {
+        setDoctors(data);
+
+        // ── Auto-filter when opened from HealthStoryBot ──
+        if (initialSpecialization) {
+          // Find the best matching specialization in the DB (case-insensitive)
+          const match = data.find(
+            (d) => d.specialization.toLowerCase() === initialSpecialization.toLowerCase()
+          );
+          if (match) {
+            setActiveChip(match.specialization);
+            setQuery("");
+          } else {
+            // Fallback: use as search query
+            setQuery(initialSpecialization);
+            setActiveChip(null);
+          }
+        } else {
+          setActiveChip(null);
+          setQuery("");
+        }
+      })
       .catch((err: any) => setError(err.message ?? "Failed to load doctors"))
       .finally(() => setLoading(false));
-  }, [visible]);
+  }, [visible, initialSpecialization]);
 
   const handleClose = () => {
     setQuery("");
@@ -80,12 +115,13 @@ const DoctorSearchModal: React.FC<Props> = ({ visible, onClose }) => {
           getScore(doc.specialization, query) * 2 + getScore(doc.name, query),
       }))
       .filter((doc) => doc.score > 0)
-      .sort((a, b) => b.score - a.score)
+      .sort((a, b) => (b as any).score - (a as any).score)
       .slice(0, 8);
   })();
 
   type ListItem =
     | { type: "searchBar" }
+    | { type: "botBanner" }
     | { type: "sectionLabel"; label: string }
     | { type: "chip"; spec: string }
     | { type: "activeFilter" }
@@ -96,6 +132,11 @@ const DoctorSearchModal: React.FC<Props> = ({ visible, onClose }) => {
   const listData: ListItem[] = [{ type: "searchBar" }];
 
   if (!loading && !error) {
+    // Show a "filtered by AI" banner when opened from bot
+    if (initialSpecialization && activeChip) {
+      listData.push({ type: "botBanner" });
+    }
+
     if (!isSearching) {
       listData.push({ type: "sectionLabel", label: "Browse by specialization" });
       specializations.forEach((spec) => listData.push({ type: "chip", spec }));
@@ -126,7 +167,7 @@ const DoctorSearchModal: React.FC<Props> = ({ visible, onClose }) => {
                 setActiveChip(null);
               }}
               style={styles.input}
-              autoFocus
+              autoFocus={!initialSpecialization} // don't steal focus when bot pre-fills
               returnKeyType="search"
             />
             {query.length > 0 ? (
@@ -138,6 +179,19 @@ const DoctorSearchModal: React.FC<Props> = ({ visible, onClose }) => {
                 <Ionicons name="close" size={22} color={colors.gray} />
               </TouchableOpacity>
             )}
+          </View>
+        );
+
+      case "botBanner":
+        return (
+          <View style={styles.botBanner}>
+            <Text style={styles.botBannerIcon}>🤖</Text>
+            <Text style={styles.botBannerText}>
+              Showing doctors recommended by the Health Bot
+            </Text>
+            <TouchableOpacity onPress={() => setActiveChip(null)}>
+              <Ionicons name="close" size={16} color={colors.primary} />
+            </TouchableOpacity>
           </View>
         );
 
@@ -323,6 +377,20 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
     letterSpacing: 0.6,
   },
+  botBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    backgroundColor: "#EEE8FF",
+    marginHorizontal: 16,
+    marginBottom: 12,
+    padding: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#C9B8FF",
+  },
+  botBannerIcon: { fontSize: 18 },
+  botBannerText: { flex: 1, fontSize: 13, color: colors.primary, fontWeight: "500" },
   chip: {
     flexDirection: "row",
     alignItems: "center",
@@ -343,12 +411,7 @@ const styles = StyleSheet.create({
   },
   chipActive: { backgroundColor: colors.primary, borderColor: colors.primary },
   chipLeft: { flexDirection: "row", alignItems: "center", gap: 10 },
-  chipDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: colors.lightGray,
-  },
+  chipDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.lightGray },
   chipDotActive: { backgroundColor: colors.white },
   chipText: { fontSize: 14, fontWeight: "500", color: colors.text },
   chipTextActive: { color: colors.white, fontWeight: "600" },

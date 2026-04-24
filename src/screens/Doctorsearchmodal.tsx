@@ -266,19 +266,17 @@ const DoctorSearchModal: React.FC<Props> = ({ visible, onClose, initialSpecializ
             activeOpacity={0.75}
           >
             <View style={styles.avatar}>
-              <Text style={styles.avatarText}>
-                {doc.name.charAt(0).toUpperCase()}
-              </Text>
+              <Text style={styles.avatarText}>{doc.initials}</Text>
             </View>
             <View style={styles.cardInfo}>
-              <Text style={styles.cardName}>Dr. {doc.name}</Text>
+              <Text style={styles.cardName}> {doc.name}</Text>
               <View style={styles.specRow}>
                 <Ionicons name="medical-outline" size={12} color={colors.primary} />
                 <Text style={styles.cardSpec}>{doc.specialization}</Text>
               </View>
               <Text style={styles.cardExp}>
-                {doc.experience}{" "}
-                {doc.experience === 1 ? "year" : "years"} experience
+                {doc.experience_years}{" "}
+                {doc.experience_years === 1 ? "year" : "years"} experience
               </Text>
             </View>
             <Ionicons name="chevron-forward" size={16} color={colors.lightGray} />

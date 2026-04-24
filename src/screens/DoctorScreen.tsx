@@ -7,7 +7,8 @@ import {
   ActivityIndicator,
   TouchableOpacity,
 } from "react-native";
-import { doctorApi, type Doctor } from "../services/api"; // ← single import
+import { Ionicons } from "@expo/vector-icons";
+import { doctorApi, type Doctor } from "../services/api";
 import { colors } from "../styles/colors";
 
 const DoctorScreen = () => {
@@ -65,22 +66,44 @@ const DoctorScreen = () => {
       <Text style={styles.heading}>Doctors</Text>
       <FlatList
         data={doctors}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={(item) => item.id}
         contentContainerStyle={styles.list}
         showsVerticalScrollIndicator={false}
         renderItem={({ item }) => (
           <View style={styles.card}>
+            {/* Avatar using initials */}
             <View style={styles.avatar}>
-              <Text style={styles.avatarText}>
-                {item.name.charAt(0).toUpperCase()}
-              </Text>
+              <Text style={styles.avatarText}>{item.initials}</Text>
             </View>
+
             <View style={styles.info}>
-              <Text style={styles.name}>Dr. {item.name}</Text>
-              <Text style={styles.specialization}>{item.specialization}</Text>
-              <Text style={styles.experience}>
-                {item.experience} {item.experience === 1 ? "year" : "years"} experience
-              </Text>
+              {/* Name */}
+              <Text style={styles.name}>{item.name}</Text>
+
+              {/* Specialization */}
+              <View style={styles.row}>
+                <Ionicons name="medical-outline" size={12} color={colors.primary} />
+                <Text style={styles.specialization}>{item.specialization}</Text>
+              </View>
+
+              {/* Clinic */}
+              <View style={styles.row}>
+                <Ionicons name="business-outline" size={12} color={colors.gray} />
+                <Text style={styles.clinic}>{item.clinic}</Text>
+              </View>
+
+              {/* Experience + Rating */}
+              <View style={styles.row}>
+                <Ionicons name="time-outline" size={12} color={colors.gray} />
+                <Text style={styles.meta}>
+                  {item.experience_years} yrs exp
+                </Text>
+                <Text style={styles.dot}>•</Text>
+                <Ionicons name="star" size={12} color="#F59E0B" />
+                <Text style={styles.rating}>{item.rating}</Text>
+                <Text style={styles.dot}>•</Text>
+                <Text style={styles.meta}>{item.recommendation}% recommend</Text>
+              </View>
             </View>
           </View>
         )}
@@ -109,7 +132,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: colors.white,
-    borderRadius: 12,
+    borderRadius: 14,
     padding: 16,
     marginBottom: 12,
     shadowColor: "#000",
@@ -117,26 +140,25 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.06,
     shadowRadius: 4,
     elevation: 2,
+    gap: 14,
   },
   avatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 52,
+    height: 52,
+    borderRadius: 26,
     backgroundColor: colors.primary,
     alignItems: "center",
     justifyContent: "center",
-    marginRight: 14,
   },
-  avatarText: { color: colors.white, fontSize: 20, fontWeight: "700" },
-  info: { flex: 1 },
-  name: { fontSize: 16, fontWeight: "600", color: colors.text, marginBottom: 2 },
-  specialization: {
-    fontSize: 13,
-    color: colors.primary,
-    fontWeight: "500",
-    marginBottom: 2,
-  },
-  experience: { fontSize: 12, color: colors.gray },
+  avatarText: { color: colors.white, fontSize: 16, fontWeight: "700" },
+  info: { flex: 1, gap: 4 },
+  name: { fontSize: 15, fontWeight: "700", color: colors.text },
+  row: { flexDirection: "row", alignItems: "center", gap: 4 },
+  specialization: { fontSize: 12, color: colors.primary, fontWeight: "600" },
+  clinic: { fontSize: 12, color: colors.gray },
+  meta: { fontSize: 11, color: colors.gray },
+  rating: { fontSize: 11, color: "#F59E0B", fontWeight: "600" },
+  dot: { fontSize: 11, color: colors.gray },
   centered: {
     flex: 1,
     alignItems: "center",

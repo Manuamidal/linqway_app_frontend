@@ -91,18 +91,16 @@ export default function DoctorsBySpecializationScreen() {
       {!loading && !error && doctors.length > 0 && (
         <FlatList
           data={doctors}
-          keyExtractor={(item) => item.id.toString()}
+          keyExtractor={(item) => item.id}
           contentContainerStyle={styles.list}
           showsVerticalScrollIndicator={false}
           renderItem={({ item }) => (
             <View style={styles.card}>
               <View style={styles.avatar}>
-                <Text style={styles.avatarText}>
-                  {item.name.charAt(0).toUpperCase()}
-                </Text>
+                <Text style={styles.avatarText}>{item.initials}</Text>
               </View>
               <View style={styles.cardInfo}>
-                <Text style={styles.cardName}>Dr. {item.name}</Text>
+                <Text style={styles.cardName}> {item.name}</Text>
                 <View style={styles.specRow}>
                   <Ionicons name="medical-outline" size={12} color={colors.primary} />
                   <Text style={styles.cardSpec}>{item.specialization}</Text>
@@ -110,8 +108,8 @@ export default function DoctorsBySpecializationScreen() {
                 <View style={styles.expRow}>
                   <Ionicons name="time-outline" size={12} color={colors.gray} />
                   <Text style={styles.cardExp}>
-                    {item.experience}{" "}
-                    {item.experience === 1 ? "year" : "years"} experience
+                    {item.experience_years}{" "}
+                    {item.experience_years === 1 ? "year" : "years"} experience
                   </Text>
                 </View>
               </View>
